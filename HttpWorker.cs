@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CGMiner_Api_Resender
 {
@@ -45,7 +43,7 @@ namespace CGMiner_Api_Resender
 
         public string SendPost(Dictionary<string, string> data)
         {
-            string res = "false";
+            string res = null;
 
             var postData = preparePostData(data);
 

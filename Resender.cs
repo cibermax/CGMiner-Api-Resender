@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace CGMiner_Api_Resender
 {
@@ -78,23 +74,31 @@ namespace CGMiner_Api_Resender
             foreach (var command in Commands)
             {
                 var api_answer = _api.Request(command);
-                postData.Add(command, api_answer);
+                if (api_answer == null)
+                {
+                    if (_resending) _repeat(true);
+                    return;
+                }
+                var json = Parser.ToJson(api_answer);
+                postData.Add(command, json);
             }
             var post_res = _post.SendPost(postData);
-            if(_resending) _repeat();
+            if(_resending) _repeat(false);
         }
 
         
 
-        private void _repeat()
+        private void _repeat(bool more)
         {
+            var timeout = more ? Timeout*3: Timeout;
             var repeatFunc = new Action(() =>
             {
-                Thread.Sleep(Timeout * 1000);
+                Thread.Sleep(timeout*1000);
                 _resend();
             });
+            _cw("Waiting " + timeout.ToString() + " sec.");
             repeatFunc.Invoke();
-            _cw("Waiting" + Timeout.ToString() + " sec.");
+            
         }
 
         public void Start()

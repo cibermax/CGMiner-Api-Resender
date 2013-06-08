@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CGMiner_Api_Resender
 {
@@ -16,7 +12,7 @@ namespace CGMiner_Api_Resender
         public static void CW(string text)
         {
             var datetime = DateTime.Now.ToString();
-            var time = DateTime.Now.ToString("HH:mm");
+            var time = DateTime.Now.ToString("HH:mm:ss");
             Console.WriteLine(time + " " + text);
 
             _logWriter.WriteLine(datetime + " " + text);
