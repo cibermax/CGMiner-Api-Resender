@@ -83,6 +83,7 @@ namespace CGMiner_Api_Resender
                 postData.Add(command, json);
             }
             var post_res = _post.SendPost(postData);
+            _checkCmd(post_res);
             if(_resending) _repeat(false);
         }
 
@@ -120,6 +121,31 @@ namespace CGMiner_Api_Resender
             {
                 _resending = false;
                 _cw("Resender is stopping");
+            }
+        }
+
+        private void _checkCmd(string str)
+        {
+            var parts = str.Split(':');
+            if (parts.Length > 1)
+            {
+                var type = parts[0];
+                var cmd = parts[1];
+                switch (type)
+                {
+                    case "result":
+                            _cw("Server response: " + cmd);
+                    break;
+                    case "cmd":
+                        switch (cmd)
+                        {
+                            case "reboot":
+                                _cw("Server asked for reboot!");
+                                Restarer.DelayedRestart(5);
+                            break;
+                        }
+                    break;
+                }
             }
         }
     }
