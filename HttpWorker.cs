@@ -59,9 +59,13 @@ namespace CGMiner_Api_Resender
 
                 webpageStream = _webRequest.GetRequestStream();
                 webpageStream.Write(postData, 0, postData.Length);
-                webpageStream.Close();
+                
                 _cw("Post request sent");
-                res = "true";
+
+                HttpWebResponse response = (HttpWebResponse)_webRequest.GetResponse();
+                res = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                res = res.Trim(' ', ' ', '\n', '\r');
+                webpageStream.Close();
             }
             catch (Exception e)
             {
