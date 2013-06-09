@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Management;
@@ -13,7 +11,7 @@ namespace CGMiner_Api_Resender
     {
         private static void _cw(string text)
         {
-            Program.CW("Restarter: " + text);
+            Program.Cw("Restarter: " + text);
         }
 
         public static void DelayedRestart(int delay)

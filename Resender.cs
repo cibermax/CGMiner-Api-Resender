@@ -15,8 +15,7 @@ namespace CGMiner_Api_Resender
         private ApiWorker _api;
         private HttpWorker _post;
 
-        private IAsyncResult repeatAction;
-        private bool _resending = false;
+        private bool _resending;
 
         public Resender(string minerHost, Int32 minerPort, string phpHandler, Int32 timeout = 5)
         {
@@ -31,7 +30,7 @@ namespace CGMiner_Api_Resender
 
         private void _cw(string text)
         {
-            Program.CW(text);
+            Program.Cw(text);
         }
 
         public int AddCommands(string[] newCommands)
@@ -76,30 +75,54 @@ namespace CGMiner_Api_Resender
                 var api_answer = _api.Request(command);
                 if (api_answer == null)
                 {
-                    if (_resending) _repeat(true);
+                    _repeat(true);
                     return;
                 }
-                var json = Parser.ToJson(api_answer);
-                postData.Add(command, json);
+                try
+                {
+                    var json = Parser.ToJson(api_answer);
+                    postData.Add(command, json);
+                }
+                catch (Exception e)
+                {
+                    _cw("Parsing api data error: " + e.Message);
+                    _cw("Exception data: " + e.Data);
+                }
+                
             }
-            var post_res = _post.SendPost(postData);
-            _checkCmd(post_res);
-            if(_resending) _repeat(false);
+            if (postData.Count > 1)
+            {
+                var post_res = _post.SendPost(postData);
+                if (!_checkCmd(post_res))
+                {
+                    _repeat(true);
+                    return;
+                }
+            }
+            else
+            {
+                _cw("Nothing to send...");
+                _repeat(true);
+                return;
+            }
+            _repeat(false);
         }
 
         
 
         private void _repeat(bool more)
         {
-            var timeout = more ? Timeout*3: Timeout;
-            var repeatFunc = new Action(() =>
+            if (_resending)
             {
-                Thread.Sleep(timeout*1000);
-                _resend();
-            });
-            _cw("Waiting " + timeout.ToString() + " sec.");
-            repeatFunc.Invoke();
-            
+                var timeout = more ? Timeout*3 : Timeout;
+                var repeatFunc = new Action(() =>
+                    {
+                        Thread.Sleep(timeout*1000);
+                        _resend();
+                    });
+                _cw("Waiting " + (more ? " more " : "") + timeout.ToString() + " sec.");
+                repeatFunc.Invoke();
+            }
         }
 
         public void Start()
@@ -124,28 +147,39 @@ namespace CGMiner_Api_Resender
             }
         }
 
-        private void _checkCmd(string str)
+        private bool _checkCmd(string str)
         {
-            var parts = str.Split(':');
-            if (parts.Length > 1)
+            if (string.IsNullOrEmpty(str))
             {
-                var type = parts[0];
-                var cmd = parts[1];
-                switch (type)
-                {
-                    case "result":
-                            _cw("Server response: " + cmd);
-                    break;
-                    case "cmd":
-                        switch (cmd)
-                        {
-                            case "reboot":
-                                _cw("Server asked for reboot!");
-                                Restarer.DelayedRestart(5);
-                            break;
-                        }
-                    break;
-                }
+                _cw("Incorect http response!");
+                return false;
+            }
+            var parts = str.Split(':');
+            if (parts.Length <= 1) return false;
+            var type = parts[0];
+            var cmd = parts[1];
+            switch (type)
+            {
+                case "result":
+                    if (string.Equals(cmd, "true", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _cw("Server result success");
+                        return true;
+                    }
+                    _cw("Remote server returned error!");
+                    return false;
+                case "cmd":
+                    switch (cmd)
+                    {
+                        case "reboot":
+                            _cw("Server asked for reboot!");
+                            Restarer.DelayedRestart(5);
+                            return true;
+                    }
+                    return false;
+                default:
+                    _cw("Incorect http response!");
+                    return false;
             }
         }
     }

@@ -29,7 +29,7 @@ namespace CGMiner_Api_Resender
 
         private void _cw(string text)
         {
-            Program.CW("API Worker: " + text);
+            Program.Cw("API Worker: " + text);
         }
 
         public string Request(string cmd) {return _request(cmd);}
@@ -52,7 +52,8 @@ namespace CGMiner_Api_Resender
             }
             catch (SocketException e)
             {
-                _cw("Connection to CGMiner failed!");
+                _cw("Connection to CGMiner failed! Error: " + e.Message);
+                _cw("Exception data: " + e.Data);
             }
             
             return res;
