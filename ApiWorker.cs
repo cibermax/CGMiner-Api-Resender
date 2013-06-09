@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 
 namespace CGMiner_Api_Resender
@@ -50,7 +52,7 @@ namespace CGMiner_Api_Resender
                 stream.Close();
                 _cw("Api command `" + cmd + "` executed");
             }
-            catch (SocketException e)
+            catch (Exception e)
             {
                 _cw("Connection to CGMiner failed! Error: " + e.Message);
                 _cw("Exception data: " + e.Data);

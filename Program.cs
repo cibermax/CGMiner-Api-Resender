@@ -25,9 +25,11 @@ namespace CGMiner_Api_Resender
 
         private static void Main(string[] args)
         {
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
-            Console.OutputEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.ANSICodePage);
+            Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+
+            var maxLogSize = Double.Parse(ConfigurationManager.AppSettings["max_log_size_mb"]);
+
             _logFile = System.AppDomain.CurrentDomain.FriendlyName + ".log";
             if (!File.Exists(_logFile))
             {
@@ -36,7 +38,7 @@ namespace CGMiner_Api_Resender
             else
             {
                 var info = new FileInfo(_logFile);
-                if (info.Length > 1024)
+                if (info.Length > maxLogSize * 1024 * 1024)
                 {
                     info.MoveTo(Path.GetFileNameWithoutExtension(info.Name) + "_" +
                                 DateTime.Now.ToString("dd_MMM_HH_mm_ss") + ".log");
