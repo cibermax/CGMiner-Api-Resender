@@ -153,8 +153,6 @@ namespace CGMiner_Api_Resender
                                 retval = true; // Token changed
                             }
                         }
-                        var tp = (TokenPrivileges)Marshal.PtrToStructure(tu,
-                                                                typeof(TokenPrivileges));
                         Marshal.FreeHGlobal(tu);
                     }
                 }

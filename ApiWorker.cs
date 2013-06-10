@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 
 
 namespace CGMiner_Api_Resender
@@ -45,8 +43,8 @@ namespace CGMiner_Api_Resender
                 Stream stream = client.GetStream();
                 var streamReader = new StreamReader(stream);
 
-                var cmd_byte = Encoding.ASCII.GetBytes(cmd);
-                stream.Write(cmd_byte, 0, cmd_byte.Length);
+                var cmdByte = Encoding.ASCII.GetBytes(cmd);
+                stream.Write(cmdByte, 0, cmdByte.Length);
 
                 res = streamReader.ReadLine();
                 stream.Close();

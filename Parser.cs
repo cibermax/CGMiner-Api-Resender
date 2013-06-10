@@ -17,7 +17,8 @@ namespace CGMiner_Api_Resender
                 var objs1 = obj.Split(',');
                 string name = null;
 
-                foreach (var elem in from obj1 in objs1 where obj1.Length > 1 && obj != "\u0000" select obj1.Split('='))
+                string obj2 = obj;
+                foreach (var elem in from obj1 in objs1 where obj1.Length > 1 && obj2 != "\u0000" select obj1.Split('='))
                 {
                     if (name != null) data[name].Add(elem[0], elem[1]);
                     else

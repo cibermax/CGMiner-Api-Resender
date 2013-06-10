@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Configuration;
 using System.Globalization;
 using System.IO;
-using System.Net.Mime;
-using System.Text;
 using System.Threading;
 
 namespace CGMiner_Api_Resender
@@ -23,14 +20,31 @@ namespace CGMiner_Api_Resender
             _logWriter.Flush();
         }
 
-        private static void Main(string[] args)
+
+        private static void Main()
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
 
-            var maxLogSize = Double.Parse(ConfigurationManager.AppSettings["max_log_size_mb"]);
+            
 
-            _logFile = System.AppDomain.CurrentDomain.FriendlyName + ".log";
+            JsonAppConfig.DefaultSettings.Add("max_log_size", "1");
+            JsonAppConfig.DefaultSettings.Add("miner_host", "127.0.0.1");
+            JsonAppConfig.DefaultSettings.Add("miner_port", "4028");
+            JsonAppConfig.DefaultSettings.Add("commands", "summary,devs");
+            JsonAppConfig.DefaultSettings.Add("resend_timeout", "5");
+            JsonAppConfig.DefaultSettings.Add("post_url", "http://yoursite.com/store_miner_data.php");
+
+            var settings = JsonAppConfig.Read();
+
+            var maxLogSize = Double.Parse(settings["max_log_size"]);
+            var minerHost = settings["miner_host"];
+            var minerPort = settings["miner_port"];
+            var postUrl = settings["post_url"];
+            var timeout = settings["resend_timeout"];
+            var cmdsStr = settings["commands"];
+
+            _logFile = Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.FriendlyName) + ".log";
             if (!File.Exists(_logFile))
             {
                 _logWriter = new StreamWriter(_logFile);
@@ -47,19 +61,12 @@ namespace CGMiner_Api_Resender
                 else _logWriter = File.AppendText(_logFile);
             }
 
+
             Cw("CGMiner API Resender started.");
-
-            var minerHost = ConfigurationManager.AppSettings["miner_host"];
-            var minerPort = ConfigurationManager.AppSettings["miner_port"];
-            var postUrl = ConfigurationManager.AppSettings["post_url"];
-            var timeout = ConfigurationManager.AppSettings["resend_timeout"];
-            var cmdsStr = ConfigurationManager.AppSettings["commands"];
-
 
             cmdsStr = cmdsStr.Trim(' ', '.');
             var commands = cmdsStr.Split(',');
 
-            Cw("Config file loaded.");
             Cw("Host: " + minerHost);
             Cw("Port: " + minerPort);
             Cw("Post url: " + postUrl);
